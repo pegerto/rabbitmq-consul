@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"time"
 	"os"
 
 	"github.com/hashicorp/consul/api"
@@ -68,9 +69,12 @@ func main() {
 		Port:    config.Service.Port,
 		Address: config.Service.Address}
 
-	agent.ServiceRegister(service)
-	if err != nil {
-		fmt.Println(err)
-	}
+	for {
+		agent.ServiceRegister(service)
+		if err != nil {
+			fmt.Println(err)
+		}
+		time.Sleep(20*time.Second)
 
+	}
 }
