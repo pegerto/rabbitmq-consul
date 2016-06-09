@@ -20,6 +20,26 @@ type Service struct {
 	Address string
 }
 
+func parseConfig(config_file string) BridgeConfig {
+	if _, err := os.Stat(config_file); os.IsNotExist(err) {
+		fmt.Fprintf(os.Stderr, "configuration file  -%s do not exists\n", config_file)
+		os.Exit(2)
+	}
+
+	file, e := ioutil.ReadFile(config_file)
+	if e != nil {
+		fmt.Printf("File error: %v\n", e)
+		os.Exit(2)
+	}
+
+	var config BridgeConfig
+	err := yaml.Unmarshal(file, &config)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return config
+}
+
 func main() {
 
 	var config_file = flag.String("config_file", "", "Configuration file for the bridge")
@@ -35,29 +55,12 @@ func main() {
 		}
 	}
 
-	if _, err := os.Stat(*config_file); os.IsNotExist(err) {
-		fmt.Fprintf(os.Stderr, "configuration file  -%s do not exists\n", *config_file)
-		os.Exit(2)
-	}
-
-	file, e := ioutil.ReadFile(*config_file)
-	if e != nil {
-		fmt.Printf("File error: %v\n", e)
-		os.Exit(1)
-	}
-
-	var config BridgeConfig
-	err := yaml.Unmarshal(file, &config)
-	if err != nil {
-		fmt.Println(err)
-	}
-
+	config := parseConfig(*config_file)
 	client, err := api.NewClient(api.DefaultConfig())
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	fmt.Println(config.Service.Address)
 	agent := client.Agent()
 	service := &api.AgentServiceRegistration{ID: config.Service.Name,
 		Name:    config.Service.Name,

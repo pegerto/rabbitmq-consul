@@ -1,0 +1,4 @@
+service:
+  name: rabbit_mq
+  port: 5672
+  address: 10.0.0.1
